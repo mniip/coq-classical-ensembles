@@ -1,0 +1,8 @@
+-R ./ClassicalEnsembles/ ClassicalEnsembles
+
+ClassicalEnsembles/Core.v
+ClassicalEnsembles/Tactics.v
+ClassicalEnsembles/Algebra.v
+ClassicalEnsembles/Families.v
+ClassicalEnsembles/Maps.v
+ClassicalEnsembles/Product.v
