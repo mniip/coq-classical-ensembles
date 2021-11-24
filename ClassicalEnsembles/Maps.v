@@ -201,7 +201,8 @@ Proof.
   - setsolve_firstorder.
   - unset. intros ? [[x ->] j].
     exists x. split; auto. intros A ?.
-    assert (f x ∈ f¹ A) as p. {
+    assert (f x ∈ f¹ A) as p.
+    {
       apply j. now exists A.
     }
     unset. destruct p as [x' []].

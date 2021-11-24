@@ -122,12 +122,62 @@ Proof.
   - setsolve_firstorder.
   - unfold is_empty. unset.
     intros u. apply NNPP. intros ne.
-    assert (exists f, forall i, f i ∈ F i) as [f]. {
+    assert (exists f, forall i, f i ∈ F i) as [f].
+    {
       apply choice_dependent. intros i. apply NNPP.
       intros n. apply ne. exists i. intros x ?.
       apply n. now exists x.
     }
     now apply (u f).
+Qed.
+
+Theorem cartesian_is_full {X Y} (A : Ensemble X) (B : Ensemble Y)
+  : (X -> False) \/ (Y -> False) \/ (is_full A /\ is_full B) <-> is_full (A × B).
+Proof.
+  split.
+  - intros [ | [ | [p q]]].
+    + intros []. contradiction.
+    + intros []. contradiction.
+    + intros []. specialize (p x). now specialize (q y).
+  - intros p.
+    destruct (classic (inhabited X)) as [[x] | ].
+    + destruct (classic (inhabited Y)) as [[y] | ].
+      * right. right. split.
+        ** intros x'. specialize (p (x', y)). setsolve.
+        ** intros y'. specialize (p (x, y')). setsolve.
+      * right. left. auto.
+    + left. auto.
+Qed.
+
+Theorem family_cartesian_is_full {I E} (F : forall (i : I), Ensemble (E i))
+  : (exists i, E i -> False) \/ (forall i, is_full (F i)) <-> is_full (FamilyCartesian F).
+Proof.
+  split.
+  - intros [[i] | p].
+    + intros f. contradiction (f i).
+    + intros f. constructor. intros i. apply p.
+  - intros p.
+    destruct (classic (exists i, E i -> False)) as [ | ne]; auto.
+    right.
+    assert (exists (f : forall i, E i), forall (i : I), True) as [f].
+    {
+      apply (choice_dependent (fun _ _ => True)).
+      intros i. apply NNPP. intros n.
+      apply ne. exists i. intros ?. now apply n.
+    }
+    intros i x.
+    apply classic_set_in_prop_context. intros lem.
+    set (f' j := match lem (i = j) with
+                     | left e => eq_rect _ E x _ e
+                     | right _ => f j
+                     end).
+    replace x with (f' i).
+    + now destruct (p f').
+    + subst f'. simpl.
+      destruct lem as [e | ].
+      * replace e with (@eq_refl _ i); auto.
+        apply proof_irrelevance.
+      * contradiction.
 Qed.
 
 Theorem intersection_cartesian {X Y} (A1 A2 : Ensemble X) (B1 B2 : Ensemble Y)
@@ -223,7 +273,8 @@ Proof.
   intros ?. setext. unset. split.
   - now intros x [f [? ->]].
   - intros x ?.
-    assert (exists f, forall i, f i ∈ F i) as [f]. {
+    assert (exists f, forall i, f i ∈ F i) as [f].
+    {
       now apply choice_dependent.
     }
     apply classic_set_in_prop_context. intros lem.
